@@ -36,3 +36,22 @@ int main()
     return 0;
 }
 ```
+
+Так же есть две функции, позволяющие регистрировать свои операторы
+```c++
+    RPN::registorOperator(const std::string &str, const OperatorFn &fn);
+    RPN::registerSYOperator(const Token &token, const SY_Operator &op);
+```
+
+Пример
+```c++
+    std::string test = "sum(100, 100) - 50";
+    //                     name        function
+    RPN::registorOperator("sum", [](double a, double b) { return a + b; }); //<-- это необходимо, для RPN самого калькулятора
+    //                       name    predicate                assoc
+    RPN::registerSYOperator("sum", { 2, RPN::SY_Associativity::FUNCTION }); //<-- это регистрация токена для алгоритма
+
+    auto res = RPN::calculateShuntingYard(test);
+
+    std::cout << "res: " << res << std::endl;
+```
