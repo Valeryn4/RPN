@@ -19,7 +19,8 @@ public:
     {
         LEFT,
         RIGHT,
-        NONE
+        NONE,
+        FUNCTION,
     };
     using SY_Precedence = int;
     using SY_Operator = std::tuple<SY_Precedence, SY_Associativity>;

@@ -60,7 +60,7 @@ RPN::TokenList RPN::tokenFromString(const std::string & input)
     //проверка на число
     auto isNum = [](char ch) 
     {
-        return (ch >= '0' && ch <= '9');
+        return (ch >= '0' && ch <= '9' || ch == '.');
     };
     //for (auto ch : input)
     for (int i = 0; i < input.length(); ++i)
@@ -108,6 +108,14 @@ RPN::TokenList RPN::tokenFromString(const std::string & input)
             continue;
         }
 
+        //если это скобки или запятая
+        if (ch == ')' || ch == '(' || ch == ',')
+        {
+            completeOperator();
+
+            list.push_back(std::string(1, ch));
+            continue;
+        }
         //function
         op += ch;
     }
@@ -136,6 +144,9 @@ double RPN::calculate(const TokenList & list)
             stak.push(std::get<double>(v));
             continue;
         }
+
+        if (std::get<std::string>(v) == ",")
+            continue;
 
         if (stak.size() < 2)
             throw std::domain_error("unexepted error");
@@ -191,7 +202,9 @@ RPN::TokenList RPN::shuntingYardAlg(const TokenList & input)
 
                 auto delta = op1_predicate - op2_predicate;
 
-                if (delta < 0 || op1_assoc == SY_Associativity::LEFT && delta <= 0)
+                
+                auto isLeft = delta < 0 || (op1_assoc == SY_Associativity::LEFT && delta <= 0);
+                if (isLeft && op2_assoc != SY_Associativity::FUNCTION)
                 {
                     out.push_back(token2);
                     stak.pop();
@@ -208,6 +221,10 @@ RPN::TokenList RPN::shuntingYardAlg(const TokenList & input)
         else
         {
             auto str = std::get<std::string>(token);
+            if (str == ",") //ignore
+            {
+                continue;
+            }
             if (str == "(")
             {
                 stak.push(token);
